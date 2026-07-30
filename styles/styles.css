@@ -1,0 +1,358 @@
+/* ==========================================================================
+   Parallax Calculator - simulation-specific styles.
+
+   These styles are LAYERED ON TOP of the shared KL-UNL foundation
+   (foundation/kl-unl.css), which is never edited. Everything here is scoped
+   with a "pc-" prefix, or is a documented adjustment to a foundation class
+   that only applies inside this simulation.
+
+   Sizing is in rem / % / container units so the page reflows at 200% zoom and
+   down to phone-portrait widths without clipping or horizontal scrolling.
+   ========================================================================== */
+
+:root {
+  /* One spacing scale, reused everywhere, so panels and rows breathe equally. */
+  --pc-space-xs:  0.35rem;
+  --pc-space-sm:  0.6rem;
+  --pc-space-md:  1rem;
+  --pc-space-lg:  1.5rem;
+
+  /* Every value box in the equation shares these dimensions. */
+  --pc-field-width:  6rem;
+  --pc-field-height: 2.75rem;   /* also the 44 px minimum touch target */
+}
+
+/* Body copy noticeably larger than the browser default, in rem so it tracks
+   the reader's own font-size setting. (Foundation sets 0.9rem.) */
+body {
+  font-size:   1.125rem;
+  line-height: 1.5;
+}
+
+.app-shell {
+  padding-bottom: var(--pc-space-md);
+}
+
+/* The original stacks the diagram above the equation, full width, so this sim
+   uses a single column at every width instead of the foundation's 25rem/1fr
+   split. The foundation's own 56rem collapse rule stays untouched. */
+.pc-layout {
+  grid-template-columns: 1fr;
+  row-gap: var(--pc-space-md);
+}
+
+.pc-panel {
+  padding-bottom: var(--pc-space-md);
+}
+
+.panel__heading {
+  font-size:     1.25rem;
+  padding:       var(--pc-space-sm) var(--pc-space-md);
+  border-bottom: var(--border-width, 1px) var(--border-style, solid)
+                 var(--border-color, #767676);
+}
+
+/* ==========================================================================
+   Diagram
+   ========================================================================== */
+
+.pc-diagram {
+  padding:    var(--pc-space-md);
+  line-height: normal;          /* foundation sets 0 on .panel__canvas-wrap */
+}
+
+/* The artwork keeps the original Flash stage coordinates and is scaled by CSS,
+   preserving its aspect ratio. Labels are positioned as a percentage of this
+   box, so art and text always stay registered to each other. */
+.pc-stage {
+  position:       relative;
+  width:          100%;
+  max-width:      62rem;
+  margin:         0 auto;
+  aspect-ratio:   698 / 276;
+  container-type: inline-size;
+}
+
+.pc-stage__art {
+  display: block;
+  width:   100%;
+  height:  100%;
+}
+
+.pc-stage__labels {
+  position: absolute;
+  inset:    0;
+  color:    var(--foreground-color, #1a1a1a);
+}
+
+/* Label size tracks the width of the diagram so the labels always sit in the
+   same place relative to the art. The rem floor keeps them legible on a phone;
+   the plain font-size above it is the fallback for engines without container
+   query units. */
+.pc-label {
+  position:    absolute;
+  /* The original stage annotations are set in Verdana; the fallbacks keep the
+     same wide, open proportions on systems that do not ship it. */
+  font-family: Verdana, "DejaVu Sans", Tahoma, Geneva, sans-serif;
+  font-size:   0.875rem;
+  font-size:   max(0.75rem, 1.7192cqw);   /* 12 / 698 of the stage width */
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Verbatim annotation text from the original (Verdana italic on the stage). */
+.pc-label--note {
+  font-style: italic;
+  transform:  translateY(-0.22em);
+}
+
+/* MathJax-typeset symbols: d, 1 AU, pi. */
+.pc-label--sym {
+  transform: translateY(-0.28em);
+}
+
+.pc-label--pi {
+  font-size: 1.02rem;
+  font-size: max(0.875rem, 2.0057cqw);    /* 14 / 698 of the stage width */
+}
+
+/* The four-line "star's displacement on the celestial sphere" block is
+   centred on its leader brace, exactly as in the original. */
+.pc-label--block {
+  white-space: normal;
+  text-align:  center;
+  line-height: 1.375;                     /* 16.5 / 12 of the original */
+  transform:   translate(-50%, -0.22em);
+  width:       7.5em;
+}
+
+/* ==========================================================================
+   Equation and value boxes
+   ========================================================================== */
+
+.pc-fieldset {
+  padding: var(--pc-space-sm) var(--pc-space-md) 0;
+}
+
+.control-fieldset__legend {
+  font-size: 1.0625rem;
+  padding:   0 0 var(--pc-space-sm);
+}
+
+/* One flex row that wraps as a whole; every item is centred on a shared
+   vertical axis so the equals signs, boxes and units line up across the row. */
+.pc-eqn {
+  display:         flex;
+  flex-wrap:       wrap;
+  align-items:     center;
+  justify-content: center;
+  gap:             var(--pc-space-xs) var(--pc-space-sm);
+  padding:         var(--pc-space-sm) 0 var(--pc-space-md);
+  font-size:       1.375rem;
+}
+
+.pc-eqn__math {
+  display:     inline-block;
+  padding:     0 0.1em;
+  line-height: 1;
+}
+
+/* Stacked fraction: numerator, rule, denominator - the same construction the
+   original draws with a rule shape and two text fields. */
+.pc-frac {
+  display:        inline-flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.15em;
+}
+
+.pc-frac__num,
+.pc-frac__den {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.2em;
+  padding:         0.1em 0.35em;
+  line-height:     1;
+}
+
+.pc-frac__num {
+  align-self:    stretch;          /* rule spans the full width of the fraction */
+  border-bottom: 0.09em var(--border-style, solid) var(--foreground-color, #1a1a1a);
+  box-sizing:    border-box;
+}
+
+/* In the original, the value box sits centred under the fraction rule with the
+   arcsecond mark hanging outside it to the right. The mirrored side columns
+   reproduce that: the box stays centred, the mark hangs right. */
+.pc-frac__den--field {
+  display:               grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items:           center;
+  gap:                   0;
+}
+
+.pc-frac__den--field .pc-field {
+  grid-column: 2;
+}
+
+.pc-frac__den--field .pc-unit {
+  grid-column:  3;
+  justify-self: start;
+  padding-left: 0.2em;
+}
+
+/* A value box plus its unit, used outside a fraction (pc and ly terms). */
+.pc-term {
+  display:     inline-flex;
+  align-items: center;
+  gap:         0.3em;
+}
+
+/* Equal-purpose fields are visually equal: identical width, identical height,
+   digits centred as in the original. */
+.pc-field {
+  box-sizing:    border-box;
+  width:         var(--pc-field-width);
+  min-height:    var(--pc-field-height);
+  padding:       0.25rem 0.4rem;
+  font-family:   inherit;
+  font-size:     1.25rem;
+  text-align:    center;
+  color:         var(--foreground-color, #1a1a1a);
+  background:    var(--background-color, #ffffff);
+  border-width:  var(--border-width,  1px);
+  border-style:  var(--border-style,  solid);
+  border-color:  var(--border-color,  #767676);
+  border-radius: 0.15rem;
+}
+
+.pc-field:focus-visible {
+  border-color: var(--outline-color, #005fcc);
+}
+
+/* The unit doubles as the field's visible <label>: clicking it focuses the
+   field, while the accessible name comes from the .sr-only text inside. */
+.pc-unit {
+  display:     inline-flex;
+  align-items: center;
+  cursor:      pointer;
+  line-height: 1;
+}
+
+/* ==========================================================================
+   Reference notes printed along the bottom of the original stage
+   ========================================================================== */
+
+.pc-notes {
+  display:         flex;
+  flex-wrap:       wrap;
+  justify-content: center;
+  gap:             var(--pc-space-xs) var(--pc-space-lg);
+  margin:          0;
+  padding:         0 var(--pc-space-md);
+  list-style:      none;
+  font-size:       1.0625rem;
+}
+
+.pc-notes li {
+  display:     flex;
+  align-items: center;
+  gap:         0.3em;
+}
+
+/* ==========================================================================
+   Keep typeset math out of the Tab order (display-only content), while the
+   MathJax context menu and assistive MathML both keep working.
+   ========================================================================== */
+
+.pc-label mjx-container,
+.pc-eqn mjx-container,
+.pc-notes mjx-container,
+.pc-unit mjx-container {
+  outline: none;
+}
+
+/* ==========================================================================
+   Narrow widths: tablet portrait down to phone portrait.
+   Single column, nothing clipped, no horizontal scrolling.
+   ========================================================================== */
+
+@media (max-width: 48rem) {
+  .pc-eqn {
+    font-size: 1.25rem;
+    gap:       var(--pc-space-xs) var(--pc-space-sm);
+  }
+
+  .pc-notes {
+    justify-content: flex-start;
+    gap:             var(--pc-space-xs) var(--pc-space-md);
+  }
+}
+
+@media (max-width: 32rem) {
+  :root {
+    --pc-field-width: 5rem;
+  }
+
+  body {
+    font-size: 1.0625rem;
+  }
+
+  .pc-diagram {
+    padding: var(--pc-space-sm);
+  }
+
+  /* On a phone the diagram itself is only a few hundred pixels wide, so the
+     labels are allowed to shrink further with it rather than collide. Nothing
+     is lost: the full description is in #diagram-desc, and pinch/browser zoom
+     enlarges the whole figure. */
+  .pc-label {
+    font-size: max(0.625rem, 1.7192cqw);
+  }
+
+  .pc-label--pi {
+    font-size: max(0.6875rem, 2.0057cqw);
+  }
+
+  /* The longest label wraps to more, narrower lines so it stays inside the
+     figure instead of running past its right edge. */
+  .pc-label--block {
+    width:       6.5em;
+    font-size:   max(0.5625rem, 1.7192cqw);
+    line-height: 1.3;
+  }
+
+  .pc-eqn {
+    font-size: 1.125rem;
+  }
+
+  .pc-field {
+    font-size: 1.125rem;
+  }
+
+  .pc-notes {
+    flex-direction: column;
+  }
+}
+
+/* ==========================================================================
+   Reduced motion: the simulation has no animation, but honour the preference
+   for the browser-supplied focus/scroll behaviour anyway.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration:        0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration:       0.001ms !important;
+    scroll-behavior:           auto !important;
+  }
+}
+
+/* Windows high-contrast / forced-colors mode: keep the line art visible. */
+@media (forced-colors: active) {
+  .pc-field {
+    border-color: CanvasText;
+  }
+}

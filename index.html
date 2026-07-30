@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Parallax Calculator</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="foundation/klunl_favicon_32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="foundation/klunl_favicon_180.png">
+
+  <!-- Shared KL-UNL foundation (copied in unchanged; never edited) -->
+  <link href="foundation/kl-unl.css" type="text/css" rel="stylesheet" media="all">
+  <!-- Sim-specific styles layered on top of the foundation -->
+  <link href="styles/styles.css" type="text/css" rel="stylesheet" media="all">
+
+  <!-- MathJax: bundled locally (no CDN at runtime). tex-svg output keeps the
+       MathJax contextual menu ("Show Math As...") available on every symbol. -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']] },
+      svg: { fontCache: 'global' },
+      options: { menuOptions: { settings: { assistiveMml: true } } }
+    };
+  </script>
+  <script defer src="assets/mathjax/tex-svg.js"></script>
+
+  <script defer src="foundation/kl-unl-masthead.js"></script>
+  <script defer src="foundation/kl-unl.js"></script>
+  <script defer src="simulation.js"></script>
+</head>
+<body>
+  <a class="sr-only sr-only-focusable" href="#main-content">Skip to main content</a>
+
+  <main class="app-shell" id="main-content">
+
+    <!-- Title + Reset / Help / About come from the shared masthead component.
+         It renders the <h1>, reads its text from foundation/contents.json by
+         sim-id, and dispatches a "sim-reset" event that simulation.js listens for. -->
+    <kl-unl-masthead sim-id="parallaxdiag" json-url="foundation/contents.json"></kl-unl-masthead>
+
+    <div class="app-layout pc-layout">
+
+      <!-- ========================= PARALLAX DIAGRAM ========================= -->
+      <section class="panel pc-panel" aria-labelledby="diagram-heading">
+        <h2 class="panel__heading" id="diagram-heading">Parallax Diagram</h2>
+
+        <div class="panel__canvas-wrap pc-diagram">
+          <div class="pc-stage">
+            <!-- All line art below is the ORIGINAL exported Flash vector art,
+                 reused as-is and placed at the original stage coordinates
+                 (see CONVERSION_NOTES.md). The diagram is static in the
+                 original sim and is static here too. -->
+            <svg class="pc-stage__art" viewBox="14 12 698 276"
+                 xmlns="http://www.w3.org/2000/svg"
+                 role="img" aria-labelledby="diagram-title" aria-describedby="diagram-desc">
+              <title id="diagram-title">Geometry of stellar parallax, not to scale</title>
+
+              <!-- lines of sight, baseline of the orbit, the two parallax angle
+                   ticks, the celestial sphere arc and its dashes (Symbol 4) -->
+              <image href="assets/parallax-rays.svg" xlink:href="assets/parallax-rays.svg"
+                     x="72.4" y="16.95" width="519" height="264.9"
+                     preserveAspectRatio="none"></image>
+              <!-- Earth's orbit (Symbol 1) -->
+              <image href="assets/earth-orbit-circle.svg" xlink:href="assets/earth-orbit-circle.svg"
+                     x="20.2" y="103.65" width="105.4" height="105.4"
+                     preserveAspectRatio="none"></image>
+              <!-- brace spanning the distance d (Symbol 9) -->
+              <image href="assets/distance-brace.svg" xlink:href="assets/distance-brace.svg"
+                     x="72.45" y="132.2" width="347.15" height="20.3"
+                     preserveAspectRatio="none"></image>
+              <!-- leader lines to "earth's orbit" and "star", plus the brace
+                   marking the star's displacement (Symbol 11) -->
+              <image href="assets/leader-lines-and-brace.svg" xlink:href="assets/leader-lines-and-brace.svg"
+                     x="113.45" y="104.8" width="492.45" height="76.35"
+                     preserveAspectRatio="none"></image>
+              <!-- the star (Symbol 14) -->
+              <image href="assets/star-dot.svg" xlink:href="assets/star-dot.svg"
+                     x="413.1" y="150.35" width="12" height="12"
+                     preserveAspectRatio="none"></image>
+            </svg>
+
+            <!-- Diagram labels live in HTML (not painted into the artwork) so they
+                 scale with the page, stay selectable, and so every mathematical
+                 symbol can be typeset by MathJax. Text is verbatim from the
+                 original sim. The layer is aria-hidden because the whole diagram
+                 is described in #diagram-desc below. -->
+            <div class="pc-stage__labels" aria-hidden="true">
+              <span class="pc-label pc-label--note" style="left:57.249%; top:9.728%">diagram not to scale</span>
+              <span class="pc-label pc-label--note" style="left:13.152%; top:29.167%">earth's orbit</span>
+              <span class="pc-label pc-label--sym" id="label-d" style="left:32.830%; top:38.514%"></span>
+              <span class="pc-label pc-label--sym" id="label-au" style="left:3.467%; top:59.185%"></span>
+              <span class="pc-label pc-label--sym pc-label--pi" id="label-pi-star" style="left:43.324%; top:52.572%"></span>
+              <span class="pc-label pc-label--sym pc-label--pi" id="label-pi-sky" style="left:71.669%; top:46.993%"></span>
+              <span class="pc-label pc-label--note" style="left:58.660%; top:62.808%">star</span>
+              <span class="pc-label pc-label--note pc-label--block" style="left:92.701%; top:37.409%">star's<br>displacement<br>on the celestial<br>sphere</span>
+            </div>
+          </div>
+
+          <p id="diagram-desc" class="sr-only">
+            Diagram, not to scale. At the left is the Earth's orbit, drawn as a
+            circle 1 astronomical unit across. Two lines of sight leave opposite
+            sides of the orbit, cross at a nearby star, and continue to the
+            celestial sphere drawn as an arc at the right. The half angle between
+            the lines of sight, labelled pi, is the parallax angle; it is marked
+            once at the star and once out on the celestial sphere. A brace above
+            the diagram labels the distance d from the Earth's orbit to the star.
+            A brace at the far right marks the star's apparent displacement on the
+            celestial sphere. The diagram does not change as you use the
+            calculator.
+          </p>
+        </div>
+      </section>
+
+      <!-- ======================= DISTANCE CALCULATOR ======================= -->
+      <section class="panel pc-panel" aria-labelledby="calc-heading">
+        <h2 class="panel__heading" id="calc-heading">Distance Calculator</h2>
+
+        <fieldset class="control-fieldset pc-fieldset" aria-describedby="calc-instructions">
+          <legend class="control-fieldset__legend" id="calc-legend">Parallax angle and distance</legend>
+
+          <!-- Instructions for screen-reader users. The equivalent information
+               is carried visually by the formula itself and by the Help dialog. -->
+          <p id="calc-instructions" class="sr-only">
+            Type a value into any one of the three boxes. The other two are
+            recalculated for you, to three significant digits. Only digits and a
+            decimal point may be entered. While a box has keyboard focus you can
+            also step its value: the Up and Down arrow keys, or the mouse wheel,
+            nudge it up or down, and Page Up and Page Down move ten times as far.
+          </p>
+
+          <!-- The equation reproduces the original sim's on-stage formula:
+                   d = 1 / pi arcsec = 1 / ( [ ] arcsec ) = [ ] pc = [ ] ly
+               Every symbol is typeset by MathJax; the three boxes are the
+               original editable text fields. -->
+          <div class="pc-eqn">
+            <span class="pc-eqn__math" id="eqn-d"></span>
+            <span class="pc-eqn__math" id="eqn-eq-1"></span>
+
+            <span class="pc-frac">
+              <span class="pc-frac__num" id="eqn-frac1-num"></span>
+              <span class="pc-frac__den" id="eqn-frac1-den"></span>
+            </span>
+
+            <span class="pc-eqn__math" id="eqn-eq-2"></span>
+
+            <span class="pc-frac">
+              <span class="pc-frac__num" id="eqn-frac2-num"></span>
+              <span class="pc-frac__den pc-frac__den--field">
+                <input class="pc-field" id="arcsec-field" type="text" inputmode="decimal"
+                       maxlength="5" autocomplete="off" spellcheck="false" value="1">
+                <label class="pc-unit" for="arcsec-field">
+                  <span class="sr-only">Parallax angle in arcseconds</span>
+                  <span class="pc-unit__math" id="unit-arcsec" aria-hidden="true"></span>
+                </label>
+              </span>
+            </span>
+
+            <span class="pc-eqn__math" id="eqn-eq-3"></span>
+
+            <span class="pc-term">
+              <input class="pc-field" id="parsec-field" type="text" inputmode="decimal"
+                     maxlength="5" autocomplete="off" spellcheck="false" value="1">
+              <label class="pc-unit" for="parsec-field">
+                <span class="sr-only">Distance in parsecs</span>
+                <span class="pc-unit__math" id="unit-parsec" aria-hidden="true"></span>
+              </label>
+            </span>
+
+            <span class="pc-eqn__math" id="eqn-eq-4"></span>
+
+            <span class="pc-term">
+              <input class="pc-field" id="lightyear-field" type="text" inputmode="decimal"
+                     maxlength="5" autocomplete="off" spellcheck="false" value="3.26">
+              <label class="pc-unit" for="lightyear-field">
+                <span class="sr-only">Distance in lightyears</span>
+                <span class="pc-unit__math" id="unit-lightyear" aria-hidden="true"></span>
+              </label>
+            </span>
+          </div>
+
+          <!-- Spoken description of the formula, kept in step with it by
+               klunlShowEquation() in simulation.js. -->
+          <p id="eqn-sr-description" class="sr-only"></p>
+        </fieldset>
+
+        <!-- The two reference notes printed along the bottom of the original stage. -->
+        <ul class="pc-notes">
+          <li><span id="note-pi" aria-hidden="true"></span><span class="sr-only">pi</span>
+              measured in arcseconds
+              (<span id="note-arcsec" aria-hidden="true"></span><span class="sr-only">the double prime symbol</span>)</li>
+          <li><span id="note-conversion"></span></li>
+        </ul>
+      </section>
+
+    </div><!-- /.app-layout -->
+
+    <!-- Screen-reader status: announces the calculated values, with units,
+         once a change has settled (not on every keystroke). -->
+    <p id="sr-status" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+  </main>
+</body>
+</html>
